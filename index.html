@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&display=swap">
 <style>
-/* Layout: подборщик. Слева большая картинка парты с подписями «Верх» и «Низ», справа два ряда цветов и кнопка голоса;
-   ниже лента всех 17 рендеров и блок голосования. Фон — нейтральный серый, чтобы страница не спорила с выкрасками. */
+/* Layout: подборщик. Слева большая картинка парты с подписями «Верх» и «Низ», справа два ряда цветов и номер варианта;
+   ниже все 70 вариантов по рядам верха. Фон — нейтральный серый, чтобы страница не спорила с выкрасками. */
 :root{
   --ground:#E6E8E5;
   --surface:#F1F2F0;
@@ -20,8 +20,6 @@
   --line:#CFD4D0;
   --sw-line:rgba(0,0,0,.16);
   --focus:#2F6FDB;
-  --ok:#2C7A4B;
-  --warn:#9A5800;
   --f-display:"Unbounded","Onest","Segoe UI",system-ui,sans-serif;
   --f-body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
@@ -31,13 +29,13 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ground:#131618; --surface:#191D20; --raised:#202528; --ink:#E8EBE8; --ink-2:#9DA6AA;
-    --line:#2F363A; --sw-line:rgba(255,255,255,.2); --focus:#82A9F6; --ok:#6CC28F; --warn:#E3A84C;
+    --line:#2F363A; --sw-line:rgba(255,255,255,.2); --focus:#82A9F6;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --ground:#131618; --surface:#191D20; --raised:#202528; --ink:#E8EBE8; --ink-2:#9DA6AA;
-  --line:#2F363A; --sw-line:rgba(255,255,255,.2); --focus:#82A9F6; --ok:#6CC28F; --warn:#E3A84C;
+  --line:#2F363A; --sw-line:rgba(255,255,255,.2); --focus:#82A9F6;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -46,7 +44,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 h1,h2,h3{margin:0;text-wrap:balance}
 p{margin:0}
-a{color:inherit;text-underline-offset:3px}
 .wrap{max-width:1240px;margin:0 auto;padding-left:var(--gut-l);padding-right:var(--gut-r)}
 
 /* Шапка */
@@ -77,85 +74,34 @@ a{color:inherit;text-underline-offset:3px}
 .sw-grid{display:grid;gap:8px;margin-top:12px}
 .sw-grid.tops{grid-template-columns:repeat(5,minmax(0,1fr))}
 .sw-grid.bots{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
-.swb{display:grid;gap:3px;align-content:start;text-align:left;background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:6px 6px 8px;min-width:0;transition:opacity .15s}
+.swb{display:grid;gap:3px;align-content:start;text-align:left;background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:6px 6px 8px;min-width:0}
 .swb i{display:block;height:42px;border-radius:6px;background:var(--c);box-shadow:inset 0 0 0 1px var(--sw-line);margin-bottom:4px}
 .tops .swb i{height:50px}
 .swb .r{font:600 12.5px/1.2 var(--f-mono)}
 .swb .n{font-size:12px;line-height:1.2;color:var(--ink-2);overflow-wrap:anywhere}
 .swb:hover{border-color:var(--ink-2)}
 .swb[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
-.swb.na{opacity:.38}
-.swb.na:hover{opacity:.7}
-.step .hint{margin-top:10px}
 
-.result{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:14px}
-.res-head{display:flex;align-items:center;gap:12px;min-width:0}
-.res-head b{font:600 26px/1 var(--f-display)}
-.res-head span{font-size:15px;color:var(--ink-2);line-height:1.3;min-width:0}
-.vote{height:48px;border-radius:12px;border:1.5px solid var(--ink);background:var(--ink);color:var(--raised);font-weight:600;font-size:16px}
-.vote[aria-pressed="true"]{background:transparent;color:var(--ink)}
-.mine{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:14px;color:var(--ink-2)}
-.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px 3px 4px;font:600 13.5px var(--f-display);color:var(--ink)}
-.pill .xx{font:400 15px var(--f-body);color:var(--ink-2)}
-.pill:hover{border-color:var(--ink-2)}
-.ps{width:20px;height:20px;border-radius:50%;flex:none;background:linear-gradient(180deg,var(--a) 50%,var(--b) 50%);box-shadow:inset 0 0 0 1px var(--sw-line)}
+.result{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;min-width:0}
+.result b{font:600 28px/1 var(--f-display)}
+.result span{font-size:15px;color:var(--ink-2);line-height:1.35;min-width:0}
+.ps{width:18px;height:18px;border-radius:50%;flex:none;background:linear-gradient(180deg,var(--a) 50%,var(--b) 50%);box-shadow:inset 0 0 0 1px var(--sw-line)}
 
 /* Все варианты */
 .all{padding-block:8px 32px}
-.all h2,.votes h2{font:600 20px/1.25 var(--f-display)}
-.all .hint{margin-top:4px}
-.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;margin-top:14px}
-.th{position:relative;display:grid;gap:6px;padding:0 0 8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--raised);text-align:left}
+.all>h2{font:600 20px/1.25 var(--f-display)}
+.all>.hint{margin-top:4px}
+.row{margin-top:20px}
+.row h3{display:flex;align-items:center;gap:8px;font:600 15px/1.3 var(--f-body)}
+.row h3 i{width:16px;height:16px;border-radius:4px;background:var(--c);box-shadow:inset 0 0 0 1px var(--sw-line)}
+.row h3 span{font-weight:400;color:var(--ink-2)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:10px}
+.th{display:grid;gap:5px;padding:0 0 7px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--raised);text-align:left}
 .th img{display:block;width:100%;height:auto;aspect-ratio:760/628;background:#EDEDED}
-.th-t{display:flex;align-items:center;gap:8px;padding:0 9px;font:600 15px/1 var(--f-display)}
+.th-t{display:flex;align-items:center;gap:7px;padding:0 8px;font:600 14px/1 var(--f-display)}
 .th[aria-current="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
-.th .ok{position:absolute;right:6px;top:6px;font:600 11.5px/1 var(--f-body);background:var(--ink);color:var(--raised);padding:5px 8px;border-radius:999px}
 
-/* Голоса */
-.band{background:var(--surface);border-block:1px solid var(--line)}
-.votes>.wrap{padding-block:32px 36px}
-.votes-grid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:40px;align-items:start}
-.votes-grid.solo{grid-template-columns:minmax(0,560px)}
-.votes h3{font:600 15px/1.3 var(--f-body);margin-top:28px}
-.my{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:14px}
-.my-picks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.my-picks li{display:flex;align-items:center;gap:10px;min-width:0}
-.my-picks img{width:64px;height:auto;border-radius:6px;border:1px solid var(--line);flex:none;background:#EDEDED}
-.my-picks .t{flex:1;min-width:0;font-size:14px;line-height:1.3}
-.my-picks .t b{font:600 15px var(--f-display);margin-right:6px}
-.my-empty{font-size:14px;color:var(--ink-2)}
-.x{border:1px solid var(--line);background:transparent;border-radius:8px;width:30px;height:30px;line-height:1;font-size:16px;color:var(--ink-2);flex:none}
-.x:hover{color:var(--ink);border-color:var(--ink-2)}
-label{font-size:13px;font-weight:600}
-textarea{width:100%;font:15px/1.45 var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical}
-.status{font-size:13.5px;color:var(--ink-2)}
-.status[data-k="saved"]{color:var(--ok)}
-.status[data-k="error"]{color:var(--warn)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 16px;border-radius:10px;font-weight:600;font-size:15px;border:1.5px solid var(--ink);background:transparent;white-space:nowrap}
-.summary{color:var(--ink-2);margin-top:8px}
-.tally{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
-.t-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 12px;align-items:center;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-.t-code{border:0;background:none;padding:0;font:600 17px/1 var(--f-display);text-align:left;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
-.t-main{display:grid;gap:6px;min-width:0}
-.t-name{font-size:14px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.t-bar{height:8px;border-radius:99px;background:var(--surface);overflow:hidden}
-.t-bar i{display:block;height:100%;background:var(--ink);border-radius:99px}
-.t-side{display:flex;align-items:center;gap:10px;justify-content:flex-end}
-.t-num{font:600 14px var(--f-mono);white-space:nowrap}
-.faces{display:flex}
-.faces img{width:26px;height:26px;border-radius:50%;border:2px solid var(--raised);margin-left:-7px;background:var(--surface)}
-.faces img:first-child{margin-left:0}
-.none{margin-top:12px;font-size:14px;color:var(--ink-2)}
-.comments{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
-.comments li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.comments img{width:34px;height:34px;border-radius:50%;grid-row:span 2}
-.c-head{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:14px}
-.c-head b{font-weight:600}
-.c-head .c-picks{font:600 12.5px var(--f-mono);color:var(--ink-2)}
-.c-head time{font-size:12.5px;color:var(--ink-2)}
-.c-text{font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
-
-.foot{padding-block:24px 32px;font-size:13.5px;color:var(--ink-2);display:grid;gap:6px}
+.foot{border-top:1px solid var(--line);padding-block:20px 32px;font-size:13.5px;color:var(--ink-2);display:grid;gap:6px}
 
 /* Крупный просмотр */
 dialog#lb{width:min(1200px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:0;border:0;border-radius:16px;background:var(--raised);color:var(--ink);overflow:auto}
@@ -166,16 +112,12 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
 .icon{border:1px solid var(--line);background:transparent;border-radius:10px;width:38px;height:38px;font-size:20px;line-height:1;flex:none}
 #lbImg{display:block;width:100%;height:auto;max-height:calc(100dvh - 100px);object-fit:contain;background:#EDEDED}
 
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);background:var(--ink);color:var(--raised);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100vw - 32px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:30}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-
 @media (max-width:900px){
   .picker{grid-template-columns:minmax(0,1fr);gap:18px}
   .stage{top:0;z-index:5;background:var(--ground);padding-block:8px;margin-inline:calc(-1 * var(--gut-l)) calc(-1 * var(--gut-r));padding-inline:var(--gut-l) var(--gut-r);box-shadow:0 8px 12px -10px rgba(0,0,0,.25)}
   .stage-img{width:min(100%, 50vh);margin-inline:auto}
   .stage-bar{justify-content:center}
   .stage-bar .hint{display:none}
-  .votes-grid{grid-template-columns:minmax(0,1fr);gap:28px}
 }
 @media (max-width:560px){
   .head{padding-block:18px 12px}
@@ -183,15 +125,14 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   .tag span{font-size:12px;padding:5px 8px}
   .tag b{display:none}
   .tag i{width:14px;height:14px}
-  .sw-grid.tops{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+  .sw-grid.tops{gap:6px}
   .tops .swb .n{display:none}
   .tops .swb i{height:40px}
   .sw-grid.bots{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
   .bots .swb .n{display:none}
   .swb i{height:34px}
-  .thumbs{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
-  .t-row{grid-template-columns:auto auto minmax(0,1fr)}
-  .t-side{grid-column:1/-1;justify-content:space-between}
+  .result b{font-size:24px}
+  .thumbs{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -200,7 +141,7 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
 <header class="wrap head">
   <p class="eyebrow">Москва 2.0 · поз. 1.9 · рендеры от 20.11.2026</p>
   <h1>Подберите цвет каркаса парты</h1>
-  <p class="lead">Выберите цвет верха и цвет низа — парта на картинке перекрасится. Понравившиеся сочетания отметьте кнопкой «Голосую», можно до трёх.</p>
+  <p class="lead">Выберите цвет верха и цвет низа — парта на картинке перекрасится. Можно сочетать любой верх с любым низом, всего 70 вариантов.</p>
 </header>
 
 <main class="wrap picker" id="picker">
@@ -227,49 +168,23 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     <section class="step" aria-labelledby="stepBot">
       <h2 id="stepBot"><span class="num">2</span>Низ <span class="sub">опоры и перемычка</span></h2>
       <div class="sw-grid bots" id="bots" role="group" aria-labelledby="stepBot"></div>
-      <p class="hint" id="botHint">Бледные цвета отрендерены с другим верхом. Нажмёте — верх сменится сам.</p>
     </section>
-    <div class="result">
-      <div class="res-head"><b id="resCode"></b><span id="resName"></span></div>
-      <button type="button" class="vote" id="voteBtn" aria-pressed="false"></button>
-      <div class="mine" id="mine"></div>
+    <div class="result" aria-live="polite">
+      <b id="resCode"></b><span id="resName"></span>
     </div>
   </div>
 </main>
 
 <section class="wrap all" aria-labelledby="allHead">
-  <h2 id="allHead">Все 17 готовых вариантов</h2>
-  <p class="hint">Нажмите на вариант, чтобы открыть его наверху.</p>
-  <div class="thumbs" id="thumbs"></div>
-</section>
-
-<section class="band votes" id="votes">
-  <div class="wrap votes-grid">
-    <div class="my">
-      <h2>Мой голос</h2>
-      <ul class="my-picks" id="myPicks"></ul>
-      <div style="display:grid;gap:6px">
-        <label for="note">Комментарий</label>
-        <textarea id="note" maxlength="500" rows="3" placeholder="Например: В09 для начальной школы, В06 для старших классов"></textarea>
-      </div>
-      <p class="status" id="myStatus"></p>
-      <button type="button" class="btn" id="copyBtn">Скопировать выбор</button>
-      <textarea id="copyFallback" rows="5" readonly hidden aria-label="Текст выбора для копирования"></textarea>
-    </div>
-    <div id="others">
-      <h2>Голоса коллег</h2>
-      <p class="summary" id="votesSummary">Подключаюсь к голосованию…</p>
-      <ol class="tally" id="tally"></ol>
-      <p class="none" id="noVotes"></p>
-      <h3 id="commentsHead" hidden>Комментарии</h3>
-      <ul class="comments" id="comments"></ul>
-    </div>
-  </div>
+  <h2 id="allHead">Все 70 вариантов</h2>
+  <p class="hint">По рядам — цвет верха. Нажмите на вариант, чтобы открыть его наверху.</p>
+  <div id="rows"></div>
 </section>
 
 <footer class="wrap foot">
   <p>Цвет на экране приблизительный и зависит от монитора. Окончательно цвет сверяют по выкраскам порошковой краски.</p>
-  <p>Столешница и царга во всех вариантах одинаковые. Глянец и шагрень — по палитре порошковых красок. Рендеры: КТО TROYA, 20.11.2026.</p>
+  <p>В01–В17 — рендеры КТО TROYA от 20.11.2026. В18–В70 собраны из этих рендеров: сцена и камера у всех одни, верх взят с рендера с нужным цветом верха, низ — с рендера с нужным цветом низа.</p>
+  <p>Столешница и царга во всех вариантах одинаковые. Глянец и шагрень — по палитре порошковых красок.</p>
 </footer>
 
 <dialog id="lb" aria-labelledby="lbCode">
@@ -279,8 +194,6 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   </div>
   <img id="lbImg" alt="" width="1500" height="1240">
 </dialog>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -300,58 +213,32 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     "9010": ["Чистый белый", "#F1ECE1", "Шагрень"],
     "9016": ["Белый", "#F1F0EA", "Глянец"]
   };
-  const VARS = [[1,"7035","7035"],[2,"9016","9016"],[3,"7016","7016"],[4,"7001","7001"],[5,"9010","9010"],
-    [6,"7035","7016"],[7,"9016","7016"],[8,"7016","7035"],
-    [9,"7035","5015"],[10,"7035","6037"],[11,"7035","5024"],[12,"7035","6021"],[13,"9016","2003"],
-    [14,"9016","5003"],[15,"9016","4001"],[16,"7016","1021"],[17,"7016","3020"]];
+  // В01–В17 — рендеры, В18–В70 — сборка из них (compose_combos.py)
+  const VARS = [[1,"7035","7035"],[2,"9016","9016"],[3,"7016","7016"],[4,"7001","7001"],[5,"9010","9010"],[6,"7035","7016"],[7,"9016","7016"],[8,"7016","7035"],[9,"7035","5015"],[10,"7035","6037"],[11,"7035","5024"],[12,"7035","6021"],[13,"9016","2003"],[14,"9016","5003"],[15,"9016","4001"],[16,"7016","1021"],[17,"7016","3020"],
+    [18,"9016","9010"],[19,"9016","7035"],[20,"9016","7001"],[21,"9016","1021"],[22,"9016","3020"],[23,"9016","5015"],[24,"9016","5024"],[25,"9016","6021"],[26,"9016","6037"],
+    [27,"9010","9016"],[28,"9010","7035"],[29,"9010","7001"],[30,"9010","7016"],[31,"9010","1021"],[32,"9010","2003"],[33,"9010","3020"],[34,"9010","4001"],[35,"9010","5003"],[36,"9010","5015"],[37,"9010","5024"],[38,"9010","6021"],[39,"9010","6037"],
+    [40,"7035","9016"],[41,"7035","9010"],[42,"7035","7001"],[43,"7035","1021"],[44,"7035","2003"],[45,"7035","3020"],[46,"7035","4001"],[47,"7035","5003"],
+    [48,"7001","9016"],[49,"7001","9010"],[50,"7001","7035"],[51,"7001","7016"],[52,"7001","1021"],[53,"7001","2003"],[54,"7001","3020"],[55,"7001","4001"],[56,"7001","5003"],[57,"7001","5015"],[58,"7001","5024"],[59,"7001","6021"],[60,"7001","6037"],
+    [61,"7016","9016"],[62,"7016","9010"],[63,"7016","7001"],[64,"7016","2003"],[65,"7016","4001"],[66,"7016","5003"],[67,"7016","5015"],[68,"7016","5024"],[69,"7016","6021"],[70,"7016","6037"]];
   const TOPS = ["9016","9010","7035","7001","7016"];
   const BOTS = ["9016","9010","7035","7001","7016","1021","2003","3020","4001","5003","5015","5024","6021","6037"];
   // Где на кадре стоят подписи «Верх» и «Низ» (в % от ширины и высоты), сверено по маскам деталей
   const TAGS = {1: {t: [21.7, 38], b: [23, 61]}, 2: {t: [30, 29], b: [32, 45]}};
-  const MAX = 3;
-  const LS = "troya-moskva20-colors-v1";
 
   const $ = s => document.querySelector(s);
   const pad = n => String(n).padStart(2, "0");
   const code = n => "В" + pad(n);
   const src = (n, v, small) => `img/v${pad(n)}_${v}${small ? "_s" : ""}.jpg`;
-  const byN = new Map(VARS.map(([n, t, b]) => [n, {n, t, b}]));
-  const find = (t, b) => VARS.find(([, x, y]) => x === t && y === b);
+  const NUM = new Map(VARS.map(([n, t, b]) => [t + "+" + b, n]));
+  const num = (t, b) => NUM.get(t + "+" + b);
   const lc = s => s.charAt(0).toLowerCase() + s.slice(1);
-  const pairName = v => v.t === v.b ? `${RAL[v.t][0]}, весь каркас` : `${RAL[v.t][0]} + ${lc(RAL[v.b][0])}`;
-  const plural = (n, f) => { const a = n % 10, b = n % 100; return f[a === 1 && b !== 11 ? 0 : a >= 2 && a <= 4 && (b < 10 || b >= 20) ? 1 : 2]; };
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  const lb = $("#lb");
 
   let curT = "7035", curB = "7035", view = 1;
-  let picks = [], note = "";
-  let mode = "local", db = null, user = null, uid = null, votes = [], touched = false, gotFirst = false;
-  const curN = () => find(curT, curB)[0];
 
-  function clean(a) {
-    if (!Array.isArray(a)) return [];
-    const out = [];
-    for (const x of a) {
-      const n = Number(x);
-      if (Number.isInteger(n) && byN.has(n) && !out.includes(n)) out.push(n);
-      if (out.length === MAX) break;
-    }
-    return out;
-  }
-  function sanitize(d) {
-    return {
-      picks: clean(d && d.picks),
-      note: d && typeof d.note === "string" ? d.note.slice(0, 500) : "",
-      updatedAt: d && typeof d.updatedAt === "number" ? d.updatedAt : 0
-    };
-  }
-  function loadLocal() {
-    try { const o = JSON.parse(localStorage.getItem(LS) || "null"); if (o) { picks = clean(o.picks); note = typeof o.note === "string" ? o.note.slice(0, 500) : ""; } } catch (e) {}
-  }
-  function saveLocal() { try { localStorage.setItem(LS, JSON.stringify({picks, note})); } catch (e) {} }
-  function swatchDot(v) { const s = el("span", "ps"); s.style.setProperty("--a", RAL[v.t][1]); s.style.setProperty("--b", RAL[v.b][1]); return s; }
-
-  /* ---------- Подборщик ---------- */
+  function swatchDot(t, b) { const s = el("span", "ps"); s.style.setProperty("--a", RAL[t][1]); s.style.setProperty("--b", RAL[b][1]); return s; }
   function swatchButton(c, attr) {
     const [nm, hex, fin] = RAL[c];
     const b = el("button", "swb");
@@ -359,23 +246,29 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     b.dataset[attr] = c;
     b.style.setProperty("--c", hex);
     b.title = `RAL ${c} ${lc(nm)}, ${lc(fin)}`;
+    b.setAttribute("aria-label", `RAL ${c} ${lc(nm)}`);
     const i = el("i"); i.setAttribute("aria-hidden", "true");
     b.append(i, el("span", "r", c), el("span", "n", nm));
     return b;
   }
-  function renderSwatches() {
+  function render() {
     $("#tops").replaceChildren(...TOPS.map(c => swatchButton(c, "top")));
     $("#bots").replaceChildren(...BOTS.map(c => swatchButton(c, "bot")));
-  }
-  function renderThumbs() {
-    $("#thumbs").replaceChildren(...VARS.map(([n]) => {
-      const v = byN.get(n), b = el("button", "th"), im = el("img"), t = el("span", "th-t");
-      b.type = "button"; b.dataset.go = n;
-      b.setAttribute("aria-label", `${code(n)}: ${pairName(v)}`);
-      im.src = src(n, 1, true); im.width = 760; im.height = 628; im.alt = ""; im.loading = "lazy"; im.decoding = "async";
-      t.append(swatchDot(v), code(n));
-      b.append(im, t);
-      return b;
+    $("#rows").replaceChildren(...TOPS.map(t => {
+      const row = el("div", "row"), h = el("h3"), i = el("i"), grid = el("div", "thumbs");
+      i.style.setProperty("--c", RAL[t][1]);
+      h.append(i, `Верх RAL ${t}`, el("span", null, lc(RAL[t][0])));
+      BOTS.forEach(b => {
+        const n = num(t, b), btn = el("button", "th"), im = el("img"), lab = el("span", "th-t");
+        btn.type = "button"; btn.dataset.go = n;
+        btn.setAttribute("aria-label", `${code(n)}: верх RAL ${t}, низ RAL ${b} ${lc(RAL[b][0])}`);
+        im.src = src(n, 1, true); im.width = 760; im.height = 628; im.alt = ""; im.loading = "lazy"; im.decoding = "async";
+        lab.append(swatchDot(t, b), code(n));
+        btn.append(im, lab);
+        grid.append(btn);
+      });
+      row.append(h, grid);
+      return row;
     }));
   }
   function setTag(id, c, pos) {
@@ -385,299 +278,37 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     t.querySelector("b").textContent = "RAL " + c;
   }
   function update() {
-    const n = curN(), v = byN.get(n);
+    const n = num(curT, curB);
     document.querySelectorAll("[data-top]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.top === curT)));
-    let anyNa = false;
-    document.querySelectorAll("[data-bot]").forEach(b => {
-      const c = b.dataset.bot, ok = !!find(curT, c);
-      if (!ok) anyNa = true;
-      b.classList.toggle("na", !ok);
-      b.setAttribute("aria-pressed", String(c === curB));
-      b.setAttribute("aria-label", `RAL ${c} ${lc(RAL[c][0])}${ok ? "" : " — есть только с другим верхом"}`);
-    });
-    $("#botHint").hidden = !anyNa;
+    document.querySelectorAll("[data-bot]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.bot === curB)));
     const img = $("#stageImg");
     img.src = src(n, view, false);
-    img.alt = `${code(n)}: верх RAL ${v.t} ${lc(RAL[v.t][0])}, низ RAL ${v.b} ${lc(RAL[v.b][0])}, ${view === 1 ? "со стороны царги" : "со стороны ученика"}`;
-    setTag("#tagTop", v.t, TAGS[view].t);
-    setTag("#tagBot", v.b, TAGS[view].b);
+    img.alt = `${code(n)}: верх RAL ${curT} ${lc(RAL[curT][0])}, низ RAL ${curB} ${lc(RAL[curB][0])}, ${view === 1 ? "со стороны царги" : "со стороны ученика"}`;
+    setTag("#tagTop", curT, TAGS[view].t);
+    setTag("#tagBot", curB, TAGS[view].b);
     document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.view === view)));
     $("#resCode").textContent = code(n);
-    $("#resName").textContent = `Верх RAL ${v.t} ${lc(RAL[v.t][0])} · низ RAL ${v.b} ${lc(RAL[v.b][0])}`;
+    $("#resName").textContent = `Верх RAL ${curT} ${lc(RAL[curT][0])} · низ RAL ${curB} ${lc(RAL[curB][0])}`;
     document.querySelectorAll(".th").forEach(b => b.setAttribute("aria-current", String(+b.dataset.go === n)));
-    syncVote();
     if (lb.open) fillLb();
   }
-  function setTop(t) {
-    curT = t;
-    if (!find(curT, curB)) curB = t;
-    update();
-  }
-  function setBot(b) {
-    if (!find(curT, b)) {
-      const t = TOPS.find(x => find(x, b));
-      toast(`Низ «${lc(RAL[b][0])}» отрендерен с верхом «${lc(RAL[t][0])}» — верх сменился.`);
-      curT = t;
-    }
-    curB = b;
-    update();
-  }
-  function goTo(n, scroll) {
-    const v = byN.get(n);
-    curT = v.t; curB = v.b;
-    update();
-    if (scroll) $("#picker").scrollIntoView({behavior: smooth(), block: "start"});
-  }
+  // Подгружаем заранее только то, что вероятно откроют следующим: все низы при текущем верхе
+  const loaded = new Set();
   function preload() {
-    VARS.forEach(([n]) => { const i = new Image(); i.src = src(n, view, false); });
+    BOTS.forEach(b => { const s = src(num(curT, b), view, false); if (!loaded.has(s)) { loaded.add(s); new Image().src = s; } });
   }
-
-  /* ---------- Выбор ---------- */
-  function togglePick(n) {
-    const i = picks.indexOf(n);
-    if (i >= 0) picks.splice(i, 1);
-    else {
-      if (picks.length >= MAX) { toast(`Можно выбрать до трёх вариантов. Уберите один, чтобы добавить ${code(n)}.`); return; }
-      picks.push(n);
-      toast(`${code(n)} — в вашем выборе (${picks.length} из ${MAX}).`);
-    }
-    touched = true;
-    syncPicks();
-    persist();
+  function goTo(n) {
+    const v = VARS.find(x => x[0] === n);
+    curT = v[1]; curB = v[2];
+    update(); preload();
+    $("#picker").scrollIntoView({behavior: smooth(), block: "start"});
   }
-  function syncVote() {
-    const n = curN(), on = picks.includes(n), b = $("#voteBtn");
-    b.setAttribute("aria-pressed", String(on));
-    b.textContent = on ? `✓ Вы голосуете за ${code(n)} — убрать` : `Голосую за ${code(n)}`;
-  }
-  function syncPicks() {
-    syncVote();
-    const mine = $("#mine");
-    mine.replaceChildren();
-    if (!picks.length) mine.append(el("span", null, "Мой выбор пока пуст — можно отметить до трёх вариантов."));
-    else {
-      mine.append(el("span", null, "Мой выбор:"));
-      picks.forEach(n => {
-        const b = el("button", "pill");
-        b.type = "button";
-        b.setAttribute("aria-label", "Убрать " + code(n) + " из выбора");
-        b.title = "Убрать " + code(n);
-        b.append(swatchDot(byN.get(n)), code(n), el("span", "xx", "×"));
-        b.addEventListener("click", () => togglePick(n));
-        mine.append(b);
-      });
-      const a = el("a", null, "комментарий и отправка ↓");
-      a.href = "#votes";
-      a.addEventListener("click", e => { e.preventDefault(); $("#votes").scrollIntoView({behavior: smooth()}); });
-      mine.append(a);
-    }
-    document.querySelectorAll(".th").forEach(b => {
-      const has = picks.includes(+b.dataset.go);
-      let ok = b.querySelector(".ok");
-      if (has && !ok) { ok = el("span", "ok", "✓ мой"); b.append(ok); }
-      if (!has && ok) ok.remove();
-    });
-    const mp = $("#myPicks");
-    mp.replaceChildren();
-    if (!picks.length) mp.append(el("li", "my-empty", "Выберите верх и низ наверху и нажмите «Голосую». Можно до трёх вариантов."));
-    picks.forEach(n => {
-      const v = byN.get(n), li = el("li"), t = el("span", "t"), im = el("img");
-      im.src = src(n, 1, true); im.alt = ""; im.width = 64; im.height = 53;
-      t.append(el("b", null, code(n)), pairName(v));
-      const x = el("button", "x", "×");
-      x.type = "button";
-      x.setAttribute("aria-label", "Убрать " + code(n));
-      x.addEventListener("click", () => togglePick(n));
-      li.append(im, t, x);
-      mp.append(li);
-    });
-  }
-
-  /* ---------- Сохранение ---------- */
-  const STATUS = {
-    connecting: "Подключаюсь к голосованию…",
-    dbidle: "Голос сохраняется сам и виден коллегам.",
-    saving: "Сохраняю…",
-    static: "Чтобы ваш выбор дошёл до коллег, нажмите «Скопировать выбор» и отправьте текст в рабочий чат.",
-    local: "Выбор хранится только в этом браузере. Нажмите «Скопировать выбор» и отправьте текст в рабочий чат.",
-    readonly: "У вас доступ только на просмотр, поэтому голос не сохранится на странице. Скопируйте выбор и отправьте его в рабочий чат.",
-    error: "Не удалось сохранить. Проверьте интернет; выбор пока хранится в этом браузере."
-  };
-  function setStatus(k, custom) {
-    const a = $("#myStatus");
-    a.textContent = custom || STATUS[k]; a.dataset.k = k;
-  }
-  function setMode(m) {
-    mode = m;
-    setStatus(m === "db" ? "dbidle" : m);
-    if (m === "connecting") $("#votesSummary").textContent = "Подключаюсь к голосованию…";
-    if (m === "local") $("#votesSummary").textContent = "Сводку голосов видно, когда страница открыта под аккаунтом Claude с правом участвовать. Если её нет, скопируйте свой выбор и отправьте в рабочий чат.";
-  }
-  let saveTimer = null, saving = false, again = false;
-  function persist() {
-    saveLocal();
-    if (mode !== "db") return;
-    clearTimeout(saveTimer);
-    setStatus("saving");
-    saveTimer = setTimeout(flush, 900);
-  }
-  async function flush(retried) {
-    if (saving) { again = true; return; }
-    saving = true;
-    try {
-      const ref = db.doc("votes/" + uid);
-      const text = note.trim().slice(0, 500);
-      if (!picks.length && !text) await ref.delete();
-      else await ref.set({picks: picks.slice(), note: text, updatedAt: Date.now()});
-      const t = new Date().toLocaleTimeString("ru-RU", {hour: "2-digit", minute: "2-digit"});
-      setStatus("saved", `Сохранено в ${t}. Коллеги видят ваш голос.`);
-    } catch (e) {
-      const c = e && e.code;
-      if (c === "invalid_argument" || c === "not_granted" || c === "revoked") setMode("readonly");
-      else if (c === "unavailable" && !retried) { saving = false; setTimeout(() => flush(true), 600 + Math.random() * 900); return; }
-      else setStatus("error");
-    }
-    saving = false;
-    if (again) { again = false; flush(); }
-  }
-
-  /* ---------- Голоса коллег ---------- */
-  async function connect() {
-    const use = window.claude && window.claude.use;
-    if (typeof use !== "function") {
-      // Страница открыта вне Claude (обычный хостинг): сводки голосов нет, только копирование выбора
-      $("#others").hidden = true;
-      $(".votes-grid").classList.add("solo");
-      setMode("static");
-      return;
-    }
-    setMode("connecting");
-    let d = null, u = null;
-    try { [d, u] = await Promise.all([use("db"), use("user")]); } catch (e) {}
-    user = u;
-    if (!d) { setMode("local"); return; }
-    db = d;
-    uid = user ? await user.id() : null;
-    const can = user ? await user.can("data.write") : null;
-    setMode(uid && can !== false ? "db" : "readonly");
-    subscribe();
-  }
-  function subscribe() {
-    const timer = setTimeout(() => {
-      if (!gotFirst) $("#votesSummary").textContent = "Голоса коллег пока не загрузились. Свой выбор можно скопировать и отправить в рабочий чат.";
-    }, 10000);
-    db.collection("votes").onSnapshot(snap => {
-      votes = snap.docs.filter(d => d.exists).map(d => Object.assign({id: d.id}, sanitize(d.data())));
-      if (!snap.metadata.fromCache) {
-        clearTimeout(timer);
-        if (!gotFirst) { gotFirst = true; adoptOwn(); }
-      }
-      renderVotes();
-    }, err => {
-      clearTimeout(timer);
-      $("#votesSummary").textContent = "Голоса коллег сейчас недоступны. Свой выбор можно скопировать и отправить в рабочий чат.";
-      if (mode === "db" && err && err.code === "revoked") setMode("local");
-    });
-  }
-  function adoptOwn() {
-    if (mode !== "db" || !uid) return;
-    if (touched) { persist(); return; }
-    const mine = votes.find(v => v.id === uid);
-    if (mine) {
-      picks = mine.picks.slice(); note = mine.note;
-      $("#note").value = note;
-      saveLocal(); syncPicks();
-    } else if (picks.length || note.trim()) persist();
-  }
-  let rv = 0;
-  async function renderVotes() {
-    const my = ++rv;
-    const list = votes.filter(v => v.picks.length || v.note);
-    const voters = list.filter(v => v.picks.length);
-    let ps = {};
-    if (user && list.length) { try { ps = await user.profiles(list.map(v => v.id)); } catch (e) {} }
-    if (my !== rv) return;
-    const who = id => {
-      const p = ps[id] || {}, me = id === uid;
-      return {name: (p.name || (me ? "Вы" : "Коллега")) + (me && p.name ? " (вы)" : ""), avatar: p.avatarUrl || ""};
-    };
-    const n = voters.length;
-    $("#votesSummary").textContent = n
-      ? `${n} ${plural(n, ["человек проголосовал", "человека проголосовали", "человек проголосовали"])}. Полоса показывает, какая доля из них выбрала вариант.`
-      : "Пока никто не проголосовал. Ваш голос будет первым.";
-
-    const counts = new Map();
-    voters.forEach(v => v.picks.forEach(k => { if (!counts.has(k)) counts.set(k, []); counts.get(k).push(v.id); }));
-    const rows = [...counts.entries()].sort((a, b) => b[1].length - a[1].length || a[0] - b[0]);
-    const ol = $("#tally");
-    ol.replaceChildren();
-    rows.forEach(([k, ids]) => {
-      const v = byN.get(k), li = el("li", "t-row");
-      const c = el("button", "t-code", code(k));
-      c.type = "button"; c.dataset.go = k; c.dataset.scroll = "1";
-      c.title = "Показать наверху";
-      const main = el("div", "t-main");
-      const bar = el("span", "t-bar"), fill = el("i");
-      fill.style.width = Math.round(ids.length / n * 100) + "%";
-      bar.append(fill);
-      main.append(el("span", "t-name", pairName(v)), bar);
-      const side = el("div", "t-side"), faces = el("span", "faces");
-      ids.slice(0, 8).forEach(id => { const w = who(id); if (!w.avatar) return; const im = el("img"); im.src = w.avatar; im.alt = w.name; im.title = w.name; faces.append(im); });
-      side.append(faces, el("span", "t-num", `${ids.length} из ${n}`));
-      li.append(c, swatchDot(v), main, side);
-      ol.append(li);
-    });
-    const none = VARS.map(([k]) => k).filter(k => !counts.has(k));
-    $("#noVotes").textContent = n && none.length ? "Без голосов: " + none.map(code).join(", ") : "";
-
-    const withNote = list.filter(v => v.note).sort((a, b) => b.updatedAt - a.updatedAt);
-    const ul = $("#comments");
-    ul.replaceChildren();
-    $("#commentsHead").hidden = !withNote.length;
-    withNote.forEach(v => {
-      const w = who(v.id), li = el("li"), im = el("img");
-      im.src = w.avatar; im.alt = "";
-      const head = el("div", "c-head");
-      head.append(el("b", null, w.name));
-      if (v.picks.length) head.append(el("span", "c-picks", v.picks.map(code).join(" · ")));
-      if (v.updatedAt) {
-        const t = el("time", null, new Date(v.updatedAt).toLocaleString("ru-RU", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"}));
-        t.dateTime = new Date(v.updatedAt).toISOString();
-        head.append(t);
-      }
-      li.append(im, head, el("p", "c-text", v.note));
-      ul.append(li);
-    });
-  }
-
-  /* ---------- Копирование ---------- */
-  function copyText() {
-    const lines = ["Москва 2.0, поз. 1.9. Мой выбор цвета каркаса парты:"];
-    if (!picks.length) lines.push("ничего не выбрано");
-    picks.forEach(k => {
-      const v = byN.get(k);
-      lines.push(v.t === v.b
-        ? `${code(k)}: весь каркас RAL ${v.t} ${lc(RAL[v.t][0])}`
-        : `${code(k)}: верх RAL ${v.t} ${lc(RAL[v.t][0])}, низ RAL ${v.b} ${lc(RAL[v.b][0])}`);
-    });
-    if (note.trim()) lines.push("Комментарий: " + note.trim());
-    return lines.join("\n");
-  }
-  $("#copyBtn").addEventListener("click", () => {
-    const t = copyText(), fb = $("#copyFallback");
-    const fallback = () => { fb.value = t; fb.hidden = false; fb.focus(); fb.select(); toast("Скопировать автоматически не вышло. Текст выделен, скопируйте его вручную."); };
-    try {
-      navigator.clipboard.writeText(t).then(() => { fb.hidden = true; toast("Скопировано. Вставьте текст в рабочий чат."); }, fallback);
-    } catch (e) { fallback(); }
-  });
 
   /* ---------- Крупный просмотр ---------- */
-  const lb = $("#lb");
   function fillLb() {
-    const n = curN();
-    $("#lbImg").src = src(n, view, false);
+    $("#lbImg").src = src(num(curT, curB), view, false);
     $("#lbImg").alt = $("#stageImg").alt;
-    $("#lbCode").textContent = code(n);
+    $("#lbCode").textContent = $("#resCode").textContent;
     $("#lbName").textContent = $("#resName").textContent;
   }
   $("#zoomBtn").addEventListener("click", () => { fillLb(); try { lb.showModal(); } catch (e) { lb.setAttribute("open", ""); } });
@@ -688,30 +319,14 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   document.addEventListener("click", e => {
     const t = e.target.closest("button");
     if (!t) return;
-    if (t.dataset.top) setTop(t.dataset.top);
-    else if (t.dataset.bot) setBot(t.dataset.bot);
+    if (t.dataset.top) { curT = t.dataset.top; update(); preload(); }
+    else if (t.dataset.bot) { curB = t.dataset.bot; update(); }
     else if (t.dataset.view) { view = +t.dataset.view; update(); preload(); }
-    else if (t.dataset.go) goTo(+t.dataset.go, true);
+    else if (t.dataset.go) goTo(+t.dataset.go);
   });
-  $("#voteBtn").addEventListener("click", () => togglePick(curN()));
-  $("#note").addEventListener("input", e => { note = e.target.value.slice(0, 500); touched = true; persist(); });
 
-  let toastTimer = null;
-  function toast(msg) {
-    const t = $("#toast");
-    t.textContent = msg; t.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove("show"), 3400);
-  }
-
-  renderSwatches();
-  renderThumbs();
-  loadLocal();
-  $("#note").value = note;
+  render();
   update();
-  syncPicks();
-  setMode("local");
-  connect();
   window.addEventListener("load", preload);
 })();
 </script>
