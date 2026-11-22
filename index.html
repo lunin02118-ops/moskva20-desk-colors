@@ -57,6 +57,9 @@ p{margin:0}
 .stage{position:sticky;top:12px;margin:0;display:grid;gap:10px}
 .stage-img{position:relative;display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#EDEDED;cursor:zoom-in}
 .stage-img img{display:block;width:100%;height:auto;aspect-ratio:1500/1240}
+/* Слой декора столешницы и царги: прозрачный webp того же кадра поверх рендера каркаса */
+.ov{position:absolute;inset:0;width:100%;height:100%!important;pointer-events:none}
+.ov[hidden]{display:none!important}
 .tag{position:absolute;display:flex;align-items:center;gap:7px;transform:translate(-9px,-50%);pointer-events:none;transition:left .2s,top .2s}
 .tag i{width:18px;height:18px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(0,0,0,.35);flex:none}
 .tag span{background:#fff;color:#1C2124;font:600 13px/1 var(--f-body);padding:7px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.2);white-space:nowrap}
@@ -74,6 +77,8 @@ p{margin:0}
 .sw-grid{display:grid;gap:8px;margin-top:12px}
 .sw-grid.tops{grid-template-columns:repeat(5,minmax(0,1fr))}
 .sw-grid.bots{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
+.sw-grid.decs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.decs .swb .r{font:600 14px/1.2 var(--f-body)}
 .swb{display:grid;gap:3px;align-content:start;text-align:left;background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:6px 6px 8px;min-width:0}
 .swb i{display:block;height:42px;border-radius:6px;background:var(--c);box-shadow:inset 0 0 0 1px var(--sw-line);margin-bottom:4px}
 .tops .swb i{height:50px}
@@ -97,7 +102,9 @@ p{margin:0}
 .row h3 span{font-weight:400;color:var(--ink-2)}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:10px}
 .th{display:grid;gap:5px;padding:0 0 7px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--raised);text-align:left}
+.th .pic{position:relative;display:block}
 .th img{display:block;width:100%;height:auto;aspect-ratio:760/628;background:#EDEDED}
+.th img.ov{background:none}
 .th-t{display:flex;align-items:center;gap:7px;padding:0 8px;font:600 14px/1 var(--f-display)}
 .th[aria-current="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
 
@@ -110,7 +117,9 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
 .lb-top b{font:600 22px/1 var(--f-display)}
 .lb-top span{color:var(--ink-2);flex:1;min-width:0;font-size:15px}
 .icon{border:1px solid var(--line);background:transparent;border-radius:10px;width:38px;height:38px;font-size:20px;line-height:1;flex:none}
-#lbImg{display:block;width:100%;height:auto;max-height:calc(100dvh - 100px);object-fit:contain;background:#EDEDED}
+.lb-pic{position:relative;background:#EDEDED}
+#lbImg{display:block;width:100%;height:auto;max-height:calc(100dvh - 100px);object-fit:contain}
+#lbTop{object-fit:contain}
 
 @media (max-width:900px){
   .picker{grid-template-columns:minmax(0,1fr);gap:18px}
@@ -138,16 +147,19 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
 </style>
 </head>
 <body>
+
 <header class="wrap head">
   <p class="eyebrow">Москва 2.0 · поз. 1.9 · рендеры от 20.11.2026</p>
-  <h1>Подберите цвет каркаса парты</h1>
-  <p class="lead">Выберите цвет верха и цвет низа — парта на картинке перекрасится. Можно сочетать любой верх с любым низом, всего 70 вариантов.</p>
+  <h1>Подберите цвет каркаса и столешницы парты</h1>
+  <p class="lead">Выберите цвет верха, цвет низа и декор столешницы — парта на картинке перекрасится. Любой верх сочетается с любым низом: 70 вариантов каркаса, каждый с тремя декорами столешницы и царги.</p>
 </header>
 
 <main class="wrap picker" id="picker">
   <figure class="stage">
     <button type="button" class="stage-img" id="zoomBtn" aria-label="Открыть картинку крупно">
       <img id="stageImg" src="img/v01_1.jpg" width="1500" height="1240" alt="">
+      <img id="stageTop" class="ov" width="1500" height="1240" alt="" hidden>
+      <span class="tag" id="tagDec"><i></i><span>Столешница<b></b></span></span>
       <span class="tag" id="tagTop"><i></i><span>Верх<b></b></span></span>
       <span class="tag" id="tagBot"><i></i><span>Низ<b></b></span></span>
     </button>
@@ -169,6 +181,10 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
       <h2 id="stepBot"><span class="num">2</span>Низ <span class="sub">опоры и перемычка</span></h2>
       <div class="sw-grid bots" id="bots" role="group" aria-labelledby="stepBot"></div>
     </section>
+    <section class="step" aria-labelledby="stepDec">
+      <h2 id="stepDec"><span class="num">3</span>Столешница и царга <span class="sub">ЛДСП, всегда одного декора</span></h2>
+      <div class="sw-grid decs" id="decs" role="group" aria-labelledby="stepDec"></div>
+    </section>
     <div class="result" aria-live="polite">
       <b id="resCode"></b><span id="resName"></span>
     </div>
@@ -177,14 +193,15 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
 
 <section class="wrap all" aria-labelledby="allHead">
   <h2 id="allHead">Все 70 вариантов</h2>
-  <p class="hint">По рядам — цвет верха. Нажмите на вариант, чтобы открыть его наверху.</p>
+  <p class="hint">По рядам — цвет верха. Столешница на миниатюрах — как выбрано в шаге 3. Нажмите на вариант, чтобы открыть его наверху.</p>
   <div id="rows"></div>
 </section>
 
 <footer class="wrap foot">
   <p>Цвет на экране приблизительный и зависит от монитора. Окончательно цвет сверяют по выкраскам порошковой краски.</p>
   <p>В01–В17 — рендеры КТО TROYA от 20.11.2026. В18–В70 собраны из этих рендеров: сцена и камера у всех одни, верх взят с рендера с нужным цветом верха, низ — с рендера с нужным цветом низа.</p>
-  <p>Столешница и царга во всех вариантах одинаковые. Глянец и шагрень — по палитре порошковых красок.</p>
+  <p>Глянец и шагрень каркаса — по палитре порошковых красок.</p>
+  <p>Столешница и царга всегда одного декора. Берёза — как на рендерах. Бодега белая и серый получены перекраской берёзы на тех же кадрах: свет и тени взяты с рендера, цвет — с образцов ЛДСП Увадрев U3180 «Бодега белый» и U9201 «Серый». Перед решением сверьте с образцом плиты, которую закупаем. Полиуретановая кромка по периметру пока не показана.</p>
 </footer>
 
 <dialog id="lb" aria-labelledby="lbCode">
@@ -192,7 +209,10 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     <b id="lbCode"></b><span id="lbName"></span>
     <button type="button" class="icon" id="lbClose" aria-label="Закрыть">×</button>
   </div>
-  <img id="lbImg" alt="" width="1500" height="1240">
+  <div class="lb-pic">
+    <img id="lbImg" alt="" width="1500" height="1240">
+    <img id="lbTop" class="ov" alt="" width="1500" height="1240" hidden>
+  </div>
 </dialog>
 
 <script>
@@ -222,13 +242,26 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     [61,"7016","9016"],[62,"7016","9010"],[63,"7016","7001"],[64,"7016","2003"],[65,"7016","4001"],[66,"7016","5003"],[67,"7016","5015"],[68,"7016","5024"],[69,"7016","6021"],[70,"7016","6037"]];
   const TOPS = ["9016","9010","7035","7001","7016"];
   const BOTS = ["9016","9010","7035","7001","7016","1021","2003","3020","4001","5003","5015","5024","6021","6037"];
-  // Где на кадре стоят подписи «Верх» и «Низ» (в % от ширины и высоты), сверено по маскам деталей
-  const TAGS = {1: {t: [21.7, 38], b: [23, 61]}, 2: {t: [30, 29], b: [32, 45]}};
+  // Декор столешницы и царги: название, образец для кнопки, подпись. Берёза — сами рендеры, остальное — слой поверх (tabletop_recolor.py)
+  const GRAIN = "repeating-linear-gradient(100deg,rgba(110,80,40,.10) 0 2px,transparent 2px 7px)";
+  const DEC = {
+    birch:  ["Берёза", `${GRAIN},#EFD3AE`, "рендер"],
+    bodega: ["Бодега белая", `${GRAIN},#E3D8CE`, "перекраска"],
+    gray:   ["Серый", "#D5D6D8", "перекраска"]
+  };
+  const DECS = ["birch", "bodega", "gray"];
+  // Где на кадре стоят подписи (в % от ширины и высоты), сверено по маскам деталей
+  const TAGS = {1: {t: [21.7, 38], b: [23, 61], d: [40, 20]}, 2: {t: [30, 29], b: [32, 45], d: [38, 22]}};
 
   const $ = s => document.querySelector(s);
   const pad = n => String(n).padStart(2, "0");
   const code = n => "В" + pad(n);
   const src = (n, v, small) => `img/v${pad(n)}_${v}${small ? "_s" : ""}.jpg`;
+  const ovSrc = (d, v, small) => `img/top_${d}_${v}${small ? "_s" : ""}.webp`;
+  function setOv(img, v, small) {
+    img.hidden = curD === "birch";
+    if (curD !== "birch") { const s = ovSrc(curD, v, small); if (img.getAttribute("src") !== s) img.src = s; }
+  }
   const NUM = new Map(VARS.map(([n, t, b]) => [t + "+" + b, n]));
   const num = (t, b) => NUM.get(t + "+" + b);
   const lc = s => s.charAt(0).toLowerCase() + s.slice(1);
@@ -236,7 +269,7 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
   const lb = $("#lb");
 
-  let curT = "7035", curB = "7035", view = 1;
+  let curT = "7035", curB = "7035", curD = "birch", view = 1;
 
   function swatchDot(t, b) { const s = el("span", "ps"); s.style.setProperty("--a", RAL[t][1]); s.style.setProperty("--b", RAL[b][1]); return s; }
   function swatchButton(c, attr) {
@@ -251,51 +284,72 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     b.append(i, el("span", "r", c), el("span", "n", nm));
     return b;
   }
+  function decButton(d) {
+    const [nm, bg, note] = DEC[d];
+    const b = el("button", "swb");
+    b.type = "button";
+    b.dataset.dec = d;
+    b.style.setProperty("--c", bg);
+    b.setAttribute("aria-label", `Столешница и царга: ${lc(nm)}`);
+    const i = el("i"); i.setAttribute("aria-hidden", "true");
+    b.append(i, el("span", "r", nm), el("span", "n", note));
+    return b;
+  }
   function render() {
     $("#tops").replaceChildren(...TOPS.map(c => swatchButton(c, "top")));
     $("#bots").replaceChildren(...BOTS.map(c => swatchButton(c, "bot")));
+    $("#decs").replaceChildren(...DECS.map(decButton));
     $("#rows").replaceChildren(...TOPS.map(t => {
       const row = el("div", "row"), h = el("h3"), i = el("i"), grid = el("div", "thumbs");
       i.style.setProperty("--c", RAL[t][1]);
       h.append(i, `Верх RAL ${t}`, el("span", null, lc(RAL[t][0])));
       BOTS.forEach(b => {
-        const n = num(t, b), btn = el("button", "th"), im = el("img"), lab = el("span", "th-t");
+        const n = num(t, b), btn = el("button", "th"), pic = el("span", "pic"), im = el("img"), ov = el("img", "ov"), lab = el("span", "th-t");
         btn.type = "button"; btn.dataset.go = n;
         btn.setAttribute("aria-label", `${code(n)}: верх RAL ${t}, низ RAL ${b} ${lc(RAL[b][0])}`);
         im.src = src(n, 1, true); im.width = 760; im.height = 628; im.alt = ""; im.loading = "lazy"; im.decoding = "async";
+        ov.width = 760; ov.height = 628; ov.alt = ""; ov.hidden = true; ov.loading = "lazy"; ov.decoding = "async";
+        pic.append(im, ov);
         lab.append(swatchDot(t, b), code(n));
-        btn.append(im, lab);
+        btn.append(pic, lab);
         grid.append(btn);
       });
       row.append(h, grid);
       return row;
     }));
   }
-  function setTag(id, c, pos) {
+  function setTag(id, color, label, pos) {
     const t = $(id);
     t.style.left = pos[0] + "%"; t.style.top = pos[1] + "%";
-    t.querySelector("i").style.setProperty("--c", RAL[c][1]);
-    t.querySelector("b").textContent = "RAL " + c;
+    t.querySelector("i").style.setProperty("--c", color);
+    t.querySelector("b").textContent = label;
   }
   function update() {
     const n = num(curT, curB);
     document.querySelectorAll("[data-top]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.top === curT)));
     document.querySelectorAll("[data-bot]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.bot === curB)));
+    document.querySelectorAll("[data-dec]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.dec === curD)));
     const img = $("#stageImg");
     img.src = src(n, view, false);
-    img.alt = `${code(n)}: верх RAL ${curT} ${lc(RAL[curT][0])}, низ RAL ${curB} ${lc(RAL[curB][0])}, ${view === 1 ? "со стороны царги" : "со стороны ученика"}`;
-    setTag("#tagTop", curT, TAGS[view].t);
-    setTag("#tagBot", curB, TAGS[view].b);
+    setOv($("#stageTop"), view, false);
+    img.alt = `${code(n)}: верх RAL ${curT} ${lc(RAL[curT][0])}, низ RAL ${curB} ${lc(RAL[curB][0])}, столешница ${lc(DEC[curD][0])}, ${view === 1 ? "со стороны царги" : "со стороны ученика"}`;
+    setTag("#tagTop", RAL[curT][1], "RAL " + curT, TAGS[view].t);
+    setTag("#tagBot", RAL[curB][1], "RAL " + curB, TAGS[view].b);
+    setTag("#tagDec", DEC[curD][1], lc(DEC[curD][0]), TAGS[view].d);
     document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.view === view)));
     $("#resCode").textContent = code(n);
-    $("#resName").textContent = `Верх RAL ${curT} ${lc(RAL[curT][0])} · низ RAL ${curB} ${lc(RAL[curB][0])}`;
+    $("#resName").textContent = `Верх RAL ${curT} ${lc(RAL[curT][0])} · низ RAL ${curB} ${lc(RAL[curB][0])} · столешница и царга — ${lc(DEC[curD][0])}`;
     document.querySelectorAll(".th").forEach(b => b.setAttribute("aria-current", String(+b.dataset.go === n)));
+    document.querySelectorAll(".th .ov").forEach(o => setOv(o, 1, true));
     if (lb.open) fillLb();
   }
   // Подгружаем заранее только то, что вероятно откроют следующим: все низы при текущем верхе
   const loaded = new Set();
   function preload() {
-    BOTS.forEach(b => { const s = src(num(curT, b), view, false); if (!loaded.has(s)) { loaded.add(s); new Image().src = s; } });
+    const list = BOTS.map(b => src(num(curT, b), view, false));
+    // слои декора лёгкие (≈15 КБ): оба декора на оба ракурса, чтобы при смене ракурса слой не отставал от кадра
+    DECS.slice(1).forEach(d => [1, 2].forEach(v => list.push(ovSrc(d, v, false))));
+    list.forEach(s => { if (!loaded.has(s)) { loaded.add(s); new Image().src = s; } });
   }
   function goTo(n) {
     const v = VARS.find(x => x[0] === n);
@@ -307,13 +361,14 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   /* ---------- Крупный просмотр ---------- */
   function fillLb() {
     $("#lbImg").src = src(num(curT, curB), view, false);
+    setOv($("#lbTop"), view, false);
     $("#lbImg").alt = $("#stageImg").alt;
     $("#lbCode").textContent = $("#resCode").textContent;
     $("#lbName").textContent = $("#resName").textContent;
   }
   $("#zoomBtn").addEventListener("click", () => { fillLb(); try { lb.showModal(); } catch (e) { lb.setAttribute("open", ""); } });
   $("#lbClose").addEventListener("click", () => lb.close());
-  lb.addEventListener("click", e => { if (e.target === lb || e.target.id === "lbImg") lb.close(); });
+  lb.addEventListener("click", e => { if (e.target === lb || e.target.closest(".lb-pic")) lb.close(); });
 
   /* ---------- События ---------- */
   document.addEventListener("click", e => {
@@ -321,6 +376,7 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     if (!t) return;
     if (t.dataset.top) { curT = t.dataset.top; update(); preload(); }
     else if (t.dataset.bot) { curB = t.dataset.bot; update(); }
+    else if (t.dataset.dec) { curD = t.dataset.dec; update(); }
     else if (t.dataset.view) { view = +t.dataset.view; update(); preload(); }
     else if (t.dataset.go) goTo(+t.dataset.go);
   });
