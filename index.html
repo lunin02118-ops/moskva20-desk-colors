@@ -89,6 +89,23 @@ p{margin:0}
 .result span{font-size:15px;color:var(--ink-2);line-height:1.35;min-width:0}
 .ps{width:18px;height:18px;border-radius:50%;flex:none;background:linear-gradient(180deg,var(--a) 50%,var(--b) 50%);box-shadow:inset 0 0 0 1px var(--sw-line)}
 
+/* Решение: базовые цвета каркаса */
+.base-box{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:16px 18px 18px;margin-bottom:24px}
+.base-box h2{font:600 20px/1.25 var(--f-display);margin-top:6px}
+.base-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 5px;background:var(--surface);min-width:0}
+.chip i{width:26px;height:26px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px var(--sw-line);flex:none}
+.chip .t{display:flex;align-items:baseline;gap:8px;min-width:0}
+.chip b{font:600 13px/1 var(--f-mono)}
+.chip .t span{font-size:14px;line-height:1.2;color:var(--ink-2)}
+.base-box .hint{margin-top:10px}
+.base-box .thumbs{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (min-width:1000px){.base-box .thumbs{grid-template-columns:repeat(8,minmax(0,1fr))}}
+.th-s{padding:0 8px;font:500 11.5px/1 var(--f-mono);color:var(--ink-2)}
+.swb i{position:relative}
+.swb.base i::after{content:"✓";position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#fff;color:#1C2124;font:600 11px/18px var(--f-body);text-align:center;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#rows .th.base .th-t::after{content:"✓";margin-left:auto;font:600 13px/1 var(--f-body);color:var(--ink-2)}
+
 /* Все варианты */
 .all{padding-block:8px 32px}
 .all>h2{font:600 20px/1.25 var(--f-display)}
@@ -137,6 +154,13 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   .swb i{height:34px}
   .result b{font-size:24px}
   .thumbs{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .base-box{padding:14px 12px 14px}
+  .base-box .thumbs{gap:6px}
+  .th-s{display:none}
+  .base-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .chip{border-radius:12px;padding:5px 8px 5px 5px}
+  .chip .t{display:grid;gap:3px}
+  .chip .t span{font-size:12.5px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -148,6 +172,16 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
   <h1>Подберите цвет каркаса и столешницы парты</h1>
   <p class="lead">Выберите цвет верха, цвет низа и декор столешницы — парта на картинке перекрасится. Любой верх сочетается с любым низом: 70 вариантов каркаса, каждый с тремя декорами столешницы и царги.</p>
 </header>
+
+<section class="wrap" aria-labelledby="baseHead">
+  <div class="base-box">
+    <p class="eyebrow">Решение · 23.11.2026</p>
+    <h2 id="baseHead">Выбраны базовые цвета каркаса</h2>
+    <div class="base-chips" id="baseChips"></div>
+    <p class="hint">В подборщике и в таблице вариантов базовые цвета отмечены ✓. Ниже — сочетания только из базовых цветов. Верх в 6021 и 5015 не рендерили: эти цвета есть только для низа.</p>
+    <div class="thumbs" id="baseThumbs"></div>
+  </div>
+</section>
 
 <main class="wrap picker" id="picker">
   <figure class="stage">
@@ -243,6 +277,9 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     gray:   ["Серый", "#A8AAAA", "ЛДСП", "g"]
   };
   const DECS = ["birch", "bodega", "gray"];
+  // Базовые цвета каркаса — выбраны 23.11.2026
+  const BASE = ["7035", "6021", "5015", "7016"];
+  const isBase = c => BASE.includes(c);
   // Где на кадре стоят подписи (в % от ширины и высоты), сверено по маскам деталей
   const TAGS = {1: {t: [21.9, 38], b: [24, 61], d: [40, 15.5]}, 2: {t: [28.7, 29], b: [30.5, 45], d: [38, 18]}};
 
@@ -266,8 +303,9 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     b.type = "button";
     b.dataset[attr] = c;
     b.style.setProperty("--c", hex);
-    b.title = `RAL ${c} ${lc(nm)}, ${lc(fin)}`;
-    b.setAttribute("aria-label", `RAL ${c} ${lc(nm)}`);
+    b.title = `RAL ${c} ${lc(nm)}, ${lc(fin)}${isBase(c) ? ", базовый цвет" : ""}`;
+    b.setAttribute("aria-label", `RAL ${c} ${lc(nm)}${isBase(c) ? ", базовый цвет" : ""}`);
+    if (isBase(c)) b.classList.add("base");
     const i = el("i"); i.setAttribute("aria-hidden", "true");
     b.append(i, el("span", "r", c), el("span", "n", nm));
     return b;
@@ -283,7 +321,27 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     b.append(i, el("span", "r", nm), el("span", "n", note));
     return b;
   }
+  function thumb(t, b, sub) {
+    const n = num(t, b), btn = el("button", "th"), pic = el("span", "pic"), lab = el("span", "th-t");
+    btn.type = "button"; btn.dataset.go = n;
+    if (isBase(t) && isBase(b)) btn.classList.add("base");
+    btn.setAttribute("aria-label", `${code(n)}: верх RAL ${t} ${lc(RAL[t][0])}, низ RAL ${b} ${lc(RAL[b][0])}`);
+    pic.style.backgroundPosition = `${(n - 1) % 10 / 9 * 100}% ${Math.floor((n - 1) / 10) / 6 * 100}%`;
+    lab.append(swatchDot(t, b), code(n));
+    btn.append(pic, lab);
+    if (sub) btn.append(el("span", "th-s", `${t} + ${b}`));
+    return btn;
+  }
   function render() {
+    $("#baseChips").replaceChildren(...BASE.map(c => {
+      const ch = el("span", "chip"), i = el("i");
+      i.style.setProperty("--c", RAL[c][1]);
+      const t = el("span", "t");
+      t.append(el("b", null, "RAL " + c), el("span", null, RAL[c][0]));
+      ch.append(i, t);
+      return ch;
+    }));
+    $("#baseThumbs").replaceChildren(...TOPS.filter(isBase).flatMap(t => BASE.map(b => thumb(t, b, true))));
     $("#tops").replaceChildren(...TOPS.map(c => swatchButton(c, "top")));
     $("#bots").replaceChildren(...BOTS.map(c => swatchButton(c, "bot")));
     $("#decs").replaceChildren(...DECS.map(decButton));
@@ -291,15 +349,7 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
       const row = el("div", "row"), h = el("h3"), i = el("i"), grid = el("div", "thumbs");
       i.style.setProperty("--c", RAL[t][1]);
       h.append(i, `Верх RAL ${t}`, el("span", null, lc(RAL[t][0])));
-      BOTS.forEach(b => {
-        const n = num(t, b), btn = el("button", "th"), pic = el("span", "pic"), lab = el("span", "th-t");
-        btn.type = "button"; btn.dataset.go = n;
-        btn.setAttribute("aria-label", `${code(n)}: верх RAL ${t}, низ RAL ${b} ${lc(RAL[b][0])}`);
-        pic.style.backgroundPosition = `${(n - 1) % 10 / 9 * 100}% ${Math.floor((n - 1) / 10) / 6 * 100}%`;
-        lab.append(swatchDot(t, b), code(n));
-        btn.append(pic, lab);
-        grid.append(btn);
-      });
+      grid.append(...BOTS.map(b => thumb(t, b)));
       row.append(h, grid);
       return row;
     }));
@@ -323,9 +373,9 @@ dialog#lb::backdrop{background:rgba(8,10,12,.74)}
     setTag("#tagDec", DEC[curD][1], lc(DEC[curD][0]), TAGS[view].d);
     document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.view === view)));
     $("#resCode").textContent = code(n);
-    $("#resName").textContent = `Верх RAL ${curT} ${lc(RAL[curT][0])} · низ RAL ${curB} ${lc(RAL[curB][0])} · столешница и царга — ${lc(DEC[curD][0])}`;
+    $("#resName").textContent = `Верх RAL ${curT} ${lc(RAL[curT][0])} · низ RAL ${curB} ${lc(RAL[curB][0])} · столешница и царга — ${lc(DEC[curD][0])}${isBase(curT) && isBase(curB) ? " · базовые цвета" : ""}`;
     document.querySelectorAll(".th").forEach(b => b.setAttribute("aria-current", String(+b.dataset.go === n)));
-    $("#rows").style.setProperty("--th", `url(img/th_${DEC[curD][3]}.jpg)`);
+    document.body.style.setProperty("--th", `url(img/th_${DEC[curD][3]}.jpg)`);
     if (lb.open) fillLb();
   }
   // Подгружаем заранее только то, что вероятно откроют следующим: все низы при текущем верхе и другие декоры этого кадра
